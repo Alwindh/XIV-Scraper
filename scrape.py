@@ -40,6 +40,8 @@ def update_aggregate(all_entries, current_dir):
         counter += 1
         if counter >= 20:
             break
+    with open(current_dir+'aggregate.json', 'w') as aggregate_file_writer:
+        aggregate_file_writer.write(json.dumps(sorted_aggregate))
 
 def main_func():
     response_list = send_request()
