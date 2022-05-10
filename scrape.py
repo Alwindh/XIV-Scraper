@@ -42,12 +42,33 @@ def update_aggregate(all_entries, current_dir):
             break
     with open(current_dir+'aggregate.json', 'w') as aggregate_file_writer:
         aggregate_file_writer.write(json.dumps(sorted_aggregate))
+    return sorted_aggregate
+
+def combine_flipping_data(sorted_aggregate, current_dir):
+    occurance_list = []
+    for key in sorted_aggregate:
+        occurance_list.append(sorted_aggregate[key])
+    with open(current_dir+"base.flipping.data.json", "r+") as flipping_file_reader:
+        current_flipping = json.load(flipping_file_reader)
+    for key in sorted_aggregate:
+        item_element = {"itemName" : key.split('---')[-1], "itemId" : int(key.split('---')[0])}
+        if item_element not in current_flipping:
+            current_flipping.append(item_element)
+        if len(current_flipping) >= 100:
+            break
+    with open(current_dir+'flipping.data.json', 'w+') as flipping_file_writer:
+        flipping_file_writer.write(json.dumps(current_flipping))
+
+    
+    
 
 def main_func():
     response_list = send_request()
     current_dir = os.path.abspath(os.path.dirname(sys.argv[0]))+'\\'
     all_entries = update_entries(response_list, current_dir)
     print('%s total entries found so far: \n'%(len(all_entries)))
-    update_aggregate(all_entries, current_dir)
+    sorted_aggregate = update_aggregate(all_entries, current_dir)
+    combine_flipping_data(sorted_aggregate, current_dir)
+    
 
 main_func()
