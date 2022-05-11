@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import operator
-from requests import get
+from requests import get, post
 
 def send_request():
     url = 'https://universalis.app/api/extra/stats/most-recently-updated?dcName=light&entries=200'
@@ -59,16 +59,21 @@ def combine_flipping_data(sorted_aggregate, current_dir):
     with open(current_dir+'flipping.data.json', 'w+') as flipping_file_writer:
         flipping_file_writer.write(json.dumps(current_flipping))
 
-    
-    
-
-def main_func():
+def main_local_func():
     response_list = send_request()
     current_dir = os.path.abspath(os.path.dirname(sys.argv[0]))+'\\'
     all_entries = update_entries(response_list, current_dir)
     print('%s total entries found so far: \n'%(len(all_entries)))
     sorted_aggregate = update_aggregate(all_entries, current_dir)
     combine_flipping_data(sorted_aggregate, current_dir)
+
+# main_local_func()
+
+def main_api_func(api_address='http://localhost:6080/api/data/add/many'):
+    response_list = send_request()
+    post(url=api_address, json=response_list)
+
+main_api_func()
+
     
 
-main_func()
