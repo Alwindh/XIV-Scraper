@@ -3,15 +3,18 @@ let Listing = require("../models/listing.model");
 let Tally = require("../models/tally.model");
 const completeItemsDatabase = require("../items.json");
 
-router.route("/get").get((req, res) => {
-	Tally.find()
-		.then((listingResult) => res.json(listingResult))
+router.route("/get/top").get((req, res) => {
+	Tally.find({ itemName: { $exists: true } })
+		.sort({ amount: -1 })
+		.then((listingResult) => {
+			res.json(listingResult.slice(0, 100));
+		})
 		.catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/add/many").post((req, res) => {
 	if (!req.body.length || req.body.length <= 0) {
-		res.status(400).json("Post request body must be list");
+		res.status(400).json("Post request body must be a list");
 	}
 	const listings = req.body;
 	let addedListings = [];
