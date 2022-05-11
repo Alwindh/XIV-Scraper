@@ -54,21 +54,35 @@ router.route("/add/many").post((req, res) => {
 				});
 		});
 	});
-	iterationPromise.then(() => {
-		console.log("Finished processing " + req.body.length + " requests");
-		if (errorListings.length === 0 && addedListings.length > 0) {
-			console.log("Finished with status code 201");
-			res.status(201).json(addedListings);
-		} else if (errorListings.length === 0 && addedListings.length <= 0) {
-			console.log("Finished with status code 200");
+	iterationPromise
+		.then(() => {
+			console.log("\n" + new Date());
+			console.log("Finished processing a request with  " + req.body.length + " listings");
+			if (addedListings.length > 0) {
+				console.log("Added " + addedListings.length + " new listings to the database");
+			}
 
-			res.status(200).json(duplicateListings);
-		} else {
-			console.log("Finished with status code 400");
-
-			res.status(400).json(errorListings);
-		}
-	});
+			if (duplicateListings.length > 0) {
+				console.log("Ignored " + duplicateListings.length + " duplicate listings");
+			}
+			if (errorListings.length > 0) {
+				console.log(errorListings.length + " listings caused an error");
+			}
+			if (errorListings.length === 0 && addedListings.length > 0) {
+				console.log("Finished with status code 201");
+				res.status(201).json(addedListings);
+			} else if (errorListings.length === 0 && addedListings.length <= 0) {
+				console.log("Finished with status code 200");
+				res.status(200).json(duplicateListings);
+			} else {
+				console.log("Finished with status code 400");
+				res.status(400).json(errorListings);
+			}
+		})
+		.catch((err) => {
+			console.log("Something super weird happened");
+			console.log(err.message);
+		});
 });
 
 module.exports = router;
