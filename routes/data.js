@@ -1,5 +1,6 @@
 const router = require("express").Router();
 let Listing = require("../models/listing.model");
+let Tally = require("../models/tally.model");
 
 router.route("/get").get((req, res) => {
 	Listing.find()
@@ -31,7 +32,17 @@ router.route("/add/many").post((req, res) => {
 				.save()
 				.then((newListing) => {
 					addedListings.push(newListing);
-					if (index === array.length - 1) resolve();
+					Tally.findOneAndUpdate(
+						{ _id: itemId },
+						{ $set: { _id: itemId, itemId: itemId, worldId: worldId }, $inc: { amount: 1 } },
+						{ new: true, upsert: true }
+					)
+						.then(() => {
+							if (index === array.length - 1) resolve();
+						})
+						.catch((err) => {
+							if (index === array.length - 1) resolve();
+						});
 				})
 				.catch((err) => {
 					if (err.keyValue) {
@@ -44,7 +55,7 @@ router.route("/add/many").post((req, res) => {
 		});
 	});
 	iterationPromise.then(() => {
-		console.log("Finished processing request");
+		console.log("Finished processing " + req.body.length + " requests");
 		if (errorListings.length === 0 && addedListings.length > 0) {
 			console.log("Finished with status code 201");
 			res.status(201).json(addedListings);
