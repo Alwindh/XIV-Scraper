@@ -1,9 +1,10 @@
 const router = require("express").Router();
 let Listing = require("../models/listing.model");
 let Tally = require("../models/tally.model");
+const completeItemsDatabase = require("../items.json");
 
 router.route("/get").get((req, res) => {
-	Listing.find()
+	Tally.find()
 		.then((listingResult) => res.json(listingResult))
 		.catch((err) => res.status(400).json("Error: " + err));
 });
@@ -34,7 +35,15 @@ router.route("/add/many").post((req, res) => {
 					addedListings.push(newListing);
 					Tally.findOneAndUpdate(
 						{ _id: itemId },
-						{ $set: { _id: itemId, itemId: itemId, worldId: worldId }, $inc: { amount: 1 } },
+						{
+							$set: {
+								_id: itemId,
+								itemId: itemId,
+								worldId: worldId,
+								itemName: completeItemsDatabase[itemId]["en"],
+							},
+							$inc: { amount: 1 },
+						},
 						{ new: true, upsert: true }
 					)
 						.then(() => {
